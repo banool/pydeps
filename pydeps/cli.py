@@ -100,7 +100,7 @@ def parse_args(argv=()):
         home_pydeps = os.path.join(home, '.pydeps')
         if os.path.exists(home_pydeps):
             config_files.append(home_pydeps)
-        
+
     args = Arguments(config_files, debug=True, parents=[_p])
     args.add('fname', kind="FNAME:input", help='filename')
     args.add('-v', '--verbose', default=0, action='count', help="be more verbose (-vv, -vvv for more verbosity)")
@@ -123,6 +123,7 @@ def parse_args(argv=()):
     args.add('-x', '--exclude', default=[], nargs="+", metavar="FNAME", help="input files to skip")
     args.add('--externals', action='store_true', help='create list of direct external dependencies')
     args.add('--reverse', action='store_true', help="draw arrows to (instead of from) imported modules")
+    args.add('--import-times-file', default=None, help='change size of circles based on file containing import times (from 3.7+)')
 
     _args = args.parse_args(argv)
 

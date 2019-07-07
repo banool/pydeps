@@ -51,6 +51,7 @@ class Source(object):
         self.imported_by = set()     # modules that import us
         self.bacon = sys.maxsize      # bacon distance
         self.excluded = exclude
+        self.import_time = None
 
     @property
     def name_parts(self):
@@ -99,6 +100,8 @@ class Source(object):
             res['imports'] = list(sorted(self.imports))
         if self.imported_by:
             res['imported_by'] = list(sorted(self.imported_by))
+        if self.import_time is not None:
+            res['import_time'] = self.import_time
         return res
 
     def __str__(self):

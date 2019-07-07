@@ -33,6 +33,12 @@ def _pydeps(trgt, **kw):
         cli.verbose("DEPS:")
         pprint.pprint(dep_graph)
 
+    import_times_file = kw.get('import_times_file')
+    if import_times_file:
+        add_import_times(dep_graph, import_times_file)
+
+    print(dep_graph)
+
     dotsrc = depgraph_to_dotsrc(dep_graph, show_cycles, nodot, reverse)
 
     if not nodot:
@@ -50,6 +56,24 @@ def _pydeps(trgt, **kw):
             if show_svg:
                 dot.display_svg(kw, output)
 
+
+def add_import_times(dep_graph, import_times_file):
+    IGNORED = ["main", "__main__"]
+    import_times = {}
+    with open(import_times_file, "r") as f:
+        content = f.read().splitlines()
+        for l in content:
+            if l.startswith("import time: "):
+                s = l.split()
+                import_times[s[6]] = s[2]
+    for imp, v in dep_graph.sources.items():
+        if imp in IGNORED:
+            import_time = 0
+        elif imp in import_times:
+            import_time = int(import_times[imp])
+        else:
+            raise RuntimeError("Import times file incomplete, missing {}".format(imp))
+        v.import_time = import_time
 
 def depgraph_to_dotsrc(dep_graph, show_cycles, nodot, reverse):
     """Convert the dependency graph (DepGraph class) to dot source code.
