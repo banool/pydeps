@@ -113,6 +113,7 @@ def parse_args(argv=()):
     args.add('--show-dot', action='store_true', help="show output of dot conversion")
     args.add('--nodot', action='store_true', help="skip dot conversion")
     args.add('--no-output', action='store_true', help="don't create .svg/.png file, implies --no-show (-t/-o will be ignored)")
+    args.add('--sigmajs', action='store_true', help="print sigma.js compatible json to stdout")
     args.add('--show-cycles', action='store_true', help="show only import cycles")
     args.add('--debug-mf', default=0, type=int, metavar="INT", help="set the ModuleFinder.debug flag to this value")
     args.add('--noise-level', default=200, type=int, metavar="INT", help="exclude sources or sinks with degree greater than noise-level")

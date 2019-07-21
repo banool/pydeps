@@ -8,6 +8,7 @@ import pprint
 import sys
 from . import py2depgraph, cli, dot, target
 from .depgraph2dot import dep2dot, cycles2dot
+from .depgraph2sigmajs import dep2sigmajs
 import logging
 log = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ def _pydeps(trgt, **kw):
     nodot = kw.get('nodot')
     no_output = kw.get('no_output')
     output = kw.get('output')
+    sigmajs = kw.get('sigmajs')
     fmt = kw['format']
     show_svg = kw.get('show')
     reverse = kw.get('reverse')
@@ -37,11 +39,10 @@ def _pydeps(trgt, **kw):
     if import_times_file:
         add_import_times(dep_graph, import_times_file)
 
-    print(dep_graph)
-
-    dotsrc = depgraph_to_dotsrc(dep_graph, show_cycles, nodot, reverse)
-
     if not nodot:
+        dotsrc = depgraph_to_dotsrc(
+            dep_graph, show_cycles, nodot, reverse
+        )
         if kw.get('show_dot'):
             cli.verbose("DOTSRC:")
             print(dotsrc)
@@ -55,6 +56,12 @@ def _pydeps(trgt, **kw):
 
             if show_svg:
                 dot.display_svg(kw, output)
+
+    if sigmajs:
+        if not no_output:
+            with open(output, 'w') as fp:
+                cli.verbose("Writing output to:", output)
+                fp.write(dep2sigmajs(dep_graph))
 
 
 def add_import_times(dep_graph, import_times_file):

@@ -192,6 +192,7 @@ optional arguments:
   --show-dot                             show output of dot conversion
   --nodot                                skip dot conversion
   --no-output                            don't create .svg/.png file, implies --no-show (-t/-o
+  --sigmajs                              print sigma.js compatible json to stdout
                                          will be ignored)  
   --show-cycles                          show only import cycles
   --debug                                turn on all the show and verbose options
