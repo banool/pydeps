@@ -24,6 +24,9 @@ from . import colors
 from .render_context import RenderContext
 
 
+MAX_NODE_SIZE = 5
+
+
 class PyDepGraphDot(object):
     def __init__(self, colored=True):
         self.colored = colored
@@ -67,6 +70,12 @@ class PyDepGraphDot(object):
             # print space
 
             if use_import_times and visited:
+                max_import_time = max(
+                    s.import_time for s in visited if s.import_time
+                )
+                multiplier = MAX_NODE_SIZE / max_import_time
+                for src in [s for s in visited if s.import_time]:
+                    src.import_time *= multiplier
                 min_import_time = min(
                     s.import_time for s in visited if s.import_time
                 )
@@ -79,7 +88,7 @@ class PyDepGraphDot(object):
                 }
                 if use_import_times:
                     if src.import_time:
-                        size = src.import_time / float(min_import_time)
+                        size = max(src.import_time, 1)
                     else:
                         size = 1
                     kwargs["width"] = size
