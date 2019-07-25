@@ -41,7 +41,7 @@ def _pydeps(trgt, **kw):
 
     if not nodot:
         dotsrc = depgraph_to_dotsrc(
-            dep_graph, show_cycles, nodot, reverse
+                dep_graph, show_cycles, nodot, reverse, use_import_times=bool(import_times_file)
         )
         if kw.get('show_dot'):
             cli.verbose("DOTSRC:")
@@ -75,20 +75,20 @@ def add_import_times(dep_graph, import_times_file):
                 import_times[s[6]] = s[2]
     for imp, v in dep_graph.sources.items():
         if imp in IGNORED:
-            import_time = 0
+            import_time = None
         elif imp in import_times:
             import_time = int(import_times[imp])
         else:
             raise RuntimeError("Import times file incomplete, missing {}".format(imp))
         v.import_time = import_time
 
-def depgraph_to_dotsrc(dep_graph, show_cycles, nodot, reverse):
+def depgraph_to_dotsrc(dep_graph, show_cycles, nodot, reverse, use_import_times=False):
     """Convert the dependency graph (DepGraph class) to dot source code.
     """
     if show_cycles:
-        dotsrc = cycles2dot(dep_graph, reverse=reverse)
+        dotsrc = cycles2dot(dep_graph, reverse=reverse, use_import_times=use_import_times)
     elif not nodot:
-        dotsrc = dep2dot(dep_graph, reverse=reverse)
+        dotsrc = dep2dot(dep_graph, reverse=reverse, use_import_times=use_import_times)
     else:
         dotsrc = None
     return dotsrc

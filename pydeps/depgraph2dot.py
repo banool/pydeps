@@ -28,7 +28,7 @@ class PyDepGraphDot(object):
     def __init__(self, colored=True):
         self.colored = colored
 
-    def render(self, depgraph, ctx):
+    def render(self, depgraph, ctx, use_import_times=False):
         with ctx.graph():
             visited = set()
             drawn = set()
@@ -66,17 +66,27 @@ class PyDepGraphDot(object):
             space = colors.ColorSpace(visited)
             # print space
 
+            if use_import_times and visited:
+                min_import_time = min(
+                    s.import_time for s in visited if s.import_time
+                )
             for src in visited:
                 bg, fg = depgraph.get_colors(src, space)
+                kwargs = {
+                    "label": src.label,
+                    "fillcolor": colors.rgb2css(bg),
+                    "fontcolor": colors.rgb2css(fg),
+                }
+                if use_import_times:
+                    if src.import_time:
+                        size = src.import_time / float(min_import_time)
+                    else:
+                        size = 1
+                    kwargs["width"] = size
+                    kwargs["height"] = size
                 if src.name in depgraph.cyclenodes:
-                    ctx.write_node(src.name, label=src.label,
-                                   fillcolor=colors.rgb2css(bg),
-                                   fontcolor=colors.rgb2css(fg),
-                                   shape='octagon')
-                else:
-                    ctx.write_node(src.name, label=src.label,
-                                   fillcolor=colors.rgb2css(bg),
-                                   fontcolor=colors.rgb2css(fg))
+                    kwargs["shape"] = octagon
+                ctx.write_node(src.name, **kwargs)
 
         return ctx.text()
 
@@ -122,13 +132,13 @@ class CycleGraphDot(object):
         return ctx.text()
 
 
-def dep2dot(depgraph, color=True, reverse=False):
+def dep2dot(depgraph, color=True, reverse=False, use_import_times=False):
     dotter = PyDepGraphDot(colored=color)
     ctx = RenderContext(reverse=reverse)
-    return dotter.render(depgraph, ctx)
+    return dotter.render(depgraph, ctx, use_import_times=use_import_times)
 
 
-def cycles2dot(depgraph, reverse=False):
+def cycles2dot(depgraph, reverse=False, use_import_times=False):
     dotter = CycleGraphDot()
     ctx = RenderContext(reverse=reverse)
-    return dotter.render(depgraph, ctx)
+    return dotter.render(depgraph, ctx, use_import_times=use_import_times)
