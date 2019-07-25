@@ -22,6 +22,7 @@ def _pydeps(trgt, **kw):
     no_output = kw.get('no_output')
     output = kw.get('output')
     sigmajs = kw.get('sigmajs')
+    connectedness = kw.get('connectedness')
     fmt = kw['format']
     show_svg = kw.get('show')
     reverse = kw.get('reverse')
@@ -62,6 +63,11 @@ def _pydeps(trgt, **kw):
             with open(output, 'w') as fp:
                 cli.verbose("Writing output to:", output)
                 fp.write(dep2sigmajs(dep_graph))
+
+    if connectedness:
+        s = sorted(dep_graph.sources.values(), key=lambda i: len(i.imported_by), reverse=True)
+        for i in s:
+            print("{:3d} {}".format(len(i.imported_by), i.name))
 
 
 def add_import_times(dep_graph, import_times_file):
