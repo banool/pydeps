@@ -13,6 +13,10 @@ import logging
 log = logging.getLogger(__name__)
 
 
+DEFAULT_NODE_SIZE = 0.5
+MAX_NODE_SIZE = 5
+
+
 def _pydeps(trgt, **kw):
     # Pass args as a **kw dict since we need to pass it down to functions
     # called, but extract locally relevant parameters first to make the
@@ -39,6 +43,9 @@ def _pydeps(trgt, **kw):
     import_times_file = kw.get('import_times_file')
     if import_times_file:
         add_import_times(dep_graph, import_times_file)
+
+    if import_times_file or connectedness:
+        add_node_cost(dep_graph, connectedness=connectedness)
 
     if not nodot:
         dotsrc = depgraph_to_dotsrc(
@@ -68,6 +75,27 @@ def _pydeps(trgt, **kw):
         s = sorted(dep_graph.sources.values(), key=lambda i: len(i.imported_by), reverse=True)
         for i in s:
             print("{:3d} {}".format(len(i.imported_by), i.name))
+
+
+def add_node_cost(dep_graph, connectedness=False):
+    nodes = set()
+    for a, b in dep_graph:
+        nodes.add(a)
+        nodes.add(b)
+
+    max_import_time = max(
+	s.import_time for s in nodes if s.import_time
+    )
+    multiplier = MAX_NODE_SIZE / max_import_time
+    for src in nodes:
+        if src.import_time:
+            size = src.import_time * multiplier
+        else:
+            size = DEFAULT_NODE_SIZE
+        size = max(size, DEFAULT_NODE_SIZE)
+        if connectedness:
+            size /= len(src.imported_by)
+        src.size = size
 
 
 def add_import_times(dep_graph, import_times_file):

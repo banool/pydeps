@@ -52,6 +52,7 @@ class Source(object):
         self.bacon = sys.maxsize      # bacon distance
         self.excluded = exclude
         self.import_time = None
+        self.size = None
 
     @property
     def name_parts(self):

@@ -24,9 +24,6 @@ from . import colors
 from .render_context import RenderContext
 
 
-MAX_NODE_SIZE = 5
-
-
 class PyDepGraphDot(object):
     def __init__(self, colored=True):
         self.colored = colored
@@ -69,16 +66,6 @@ class PyDepGraphDot(object):
             space = colors.ColorSpace(visited)
             # print space
 
-            if use_import_times and visited:
-                max_import_time = max(
-                    s.import_time for s in visited if s.import_time
-                )
-                multiplier = MAX_NODE_SIZE / max_import_time
-                for src in [s for s in visited if s.import_time]:
-                    src.import_time *= multiplier
-                min_import_time = min(
-                    s.import_time for s in visited if s.import_time
-                )
             for src in visited:
                 bg, fg = depgraph.get_colors(src, space)
                 kwargs = {
@@ -86,13 +73,9 @@ class PyDepGraphDot(object):
                     "fillcolor": colors.rgb2css(bg),
                     "fontcolor": colors.rgb2css(fg),
                 }
-                if use_import_times:
-                    if src.import_time:
-                        size = max(src.import_time, 1)
-                    else:
-                        size = 1
-                    kwargs["width"] = size
-                    kwargs["height"] = size
+                if src.size:
+                    kwargs["width"] = src.size
+                    kwargs["height"] = src.size
                 if src.name in depgraph.cyclenodes:
                     kwargs["shape"] = octagon
                 ctx.write_node(src.name, **kwargs)
